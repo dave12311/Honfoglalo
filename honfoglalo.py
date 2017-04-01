@@ -4,16 +4,17 @@ from PIL import ImageGrab
 import os
 import pyocr
 import numpy
+import MySQLdb
 
 tools = pyocr.get_available_tools()
 tool = tools[0]
 
-mydict = {}
-lines = [line.rstrip('\n') for line in open('db.csv')]
+db = MySQLdb.connect(host='dbstudio.pe.hu',
+                    user='u444572030_user',
+                    passwd='4Tbr1jjsstlQ',
+                    db='u444572030_honfo')
 
-for data in lines:
-    tmp = data.split(';;')
-    mydict[tmp[0]] = tmp[1]
+cur = db.cursor()
 
 print("Start?")
 os.system("pause")
