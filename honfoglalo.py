@@ -9,10 +9,11 @@ import MySQLdb
 tools = pyocr.get_available_tools()
 tool = tools[0]
 
-db = MySQLdb.connect(host='dbstudio.pe.hu',
-                    user='u444572030_user',
-                    passwd='4Tbr1jjsstlQ',
-                    db='u444572030_honfo')
+db = MySQLdb.connect(host='sql11.freesqldatabase.com',
+                    user='sql11166951',
+                    passwd='yjqGuPF5g5',
+                    db='sql11166951',
+                    charset='utf8')
 
 cur = db.cursor()
 
@@ -28,13 +29,21 @@ while True:
 
     im.save("temp.png")
 
-    txt = tool.image_to_string(im,lang='hun')
+    ques = unicode(tool.image_to_string(im,lang='hun'))
 
-    txt = txt.replace("\n"," ")
+    ques = ques.replace("\n"," ")
 
-    print(txt)
+    print(ques)
 
-    try:
+    ans = unicode(raw_input(), 'cp852')
+
+    command = unicode("INSERT INTO honfoglalo (question, answer) VALUES ('" + ques + "', '" + ans + "')")
+
+    cur.execute(command)
+
+    db.commit()
+
+    '''try:
         mydict[txt]
     except KeyError:
         print("A válasz nem található az adatbázisban. Helyes válasz:")
@@ -45,8 +54,8 @@ while True:
             with open("db.csv", "a") as myfile:
                 myfile.write(wr)
     else:
-        print(mydict[txt])
+        print(mydict[txt])'''
 
-    print("Következő kör?")
-    if input() != "":
+    print(u"Következő kör?")
+    if raw_input() != "":
         break
