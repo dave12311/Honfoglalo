@@ -1,3 +1,4 @@
+# coding=UTF-8
 from PIL import Image
 from PIL import ImageGrab
 import os
@@ -19,7 +20,12 @@ os.system("pause")
 
 while True:
     im = ImageGrab.grab()
-    im = im.crop((400,342,1200,460))
+
+    im = im.crop((488,342,1100,431))
+
+    im = im.convert('LA')
+
+    im.save("temp.png")
 
     txt = tool.image_to_string(im,lang='hun')
 
