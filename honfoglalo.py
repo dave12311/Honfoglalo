@@ -3,8 +3,9 @@ from PIL import Image
 from PIL import ImageGrab
 import pyocr
 import MySQLdb
+import sys
 
-coords = (515,361,1061,466)
+coords = (497,358,1087,466)
 
 tools = pyocr.get_available_tools()
 tool = tools[0]
@@ -32,26 +33,40 @@ def getQuestion():
 
 print("Start?")
 
-debug = True if raw_input() == "/debug" else False
+debug = False
 
 while True:
-    ques = getQuestion()
-    print(ques)
 
-    #SELECT * FROM  `honfoglalo` WHERE  `question` LIKE  %kérdés%
+    command = raw_input()
 
-    #Check for ''!
-
-    ans = unicode(raw_input(), 'cp852')
-
-    if ans != "":
-        command = unicode("INSERT INTO honfoglalo (question, answer) VALUES ('" + ques + "', '" + ans + "')")
-        cur.execute(command)
-        db.commit()
-    else:
-        print(u"Adatbázisba írás kihagyva...\n")
-
-    print(u"Következő kör?")
-    if raw_input() != "":
+    if command == "debug":
+        debug = True
+        print(u"Debug-mód bekapcsolva.")
+    elif command == "normal":
+        debug = False
+        print(u"Debug-mód kikapcsolva.")
+    elif command != "":
         db.close()
-        break
+        sys.exit()
+    else:
+        ques = getQuestion()
+        ques = ques.replace("'", "")
+        print(ques)
+
+        if cur.execute("SELECT answer FROM honfoglalo WHERE question LIKE '" + ques + "'") != 0:
+            correct = cur.fetchone()
+            print(correct)
+        else:
+            print(u"A válasz nem található az adatbázisban. Helyes válasz hozzáadása?")
+
+        ans = unicode(raw_input(), 'cp852')
+
+        if ans != "":
+            command = unicode("INSERT INTO honfoglalo (question, answer) VALUES ('" + ques + "', '" + ans + "')")
+            cur.execute(command)
+            db.commit()
+            print(u"Hozzáadva az adatbázishoz.")
+        else:
+            print(u"Adatbázisba írás kihagyva...")
+
+        print(u"Következő kör?")
