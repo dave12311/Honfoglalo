@@ -1,10 +1,10 @@
 # coding=UTF-8
 from PIL import Image
 from PIL import ImageGrab
-import os
 import pyocr
-import numpy
 import MySQLdb
+
+coords = (515,361,1061,466)
 
 tools = pyocr.get_available_tools()
 tool = tools[0]
@@ -17,15 +17,25 @@ db = MySQLdb.connect(host='sql11.freesqldatabase.com',
 
 cur = db.cursor()
 
+def getQuestion():
+    im = ImageGrab.grab()
+    if debug == True: im.save("full.png")
+    im = im.crop(coords)
+    if debug == True: im.save("cropped.png")
+    im = im.convert('LA')
+    if debug == True: im.save("greyscale.png")
+
+    text = unicode(tool.image_to_string(im, lang='hun'))
+    text = text.replace('\n',' ')
+
+    return text
+
 print("Start?")
-os.system("pause")
+
+debug = True if raw_input() == "/debug" else False
 
 while True:
-    im = ImageGrab.grab()
-    im = im.crop((488,342,1100,431))
-    im = im.convert('LA')
-    ques = unicode(tool.image_to_string(im,lang='hun'))
-    ques = ques.replace("\n"," ")
+    ques = getQuestion()
     print(ques)
 
     #SELECT * FROM  `honfoglalo` WHERE  `question` LIKE  %kérdés%
@@ -34,11 +44,12 @@ while True:
 
     ans = unicode(raw_input(), 'cp852')
 
-    command = unicode("INSERT INTO honfoglalo (question, answer) VALUES ('" + ques + "', '" + ans + "')")
-
-    cur.execute(command)
-
-    db.commit()
+    if ans != "":
+        command = unicode("INSERT INTO honfoglalo (question, answer) VALUES ('" + ques + "', '" + ans + "')")
+        cur.execute(command)
+        db.commit()
+    else:
+        print(u"Adatbázisba írás kihagyva...\n")
 
     print(u"Következő kör?")
     if raw_input() != "":
